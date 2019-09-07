@@ -1,13 +1,19 @@
+# import UserOrderByInput, PostOrderByInput, CommentOrderByInput from './generated/prisma.graphql'
+
+
 type Query {
-    users(query: String, sort: String): [User!]!
-    posts(query: String): [Post!]!
-    comments: [Comment!]!
+    users(query: String, orderBy: UserOrderByInput, first: Int, skip: Int, after: ID): [User!]!
+    posts(query: String, orderBy: PostOrderByInput, first: Int, skip: Int, after: ID): [Post!]!
+    comments(query: String, orderBy: CommentOrderByInput, first: Int, skip: Int, after: ID): [Comment!]!
+    post(id: ID!): Post!
 }
 
 type Mutation {
-    createUser(data: CreateUserInput!): User!
-    deleteUser(id: ID!): User!
-    updateUser(id: ID!, data: UpdateUserInput!): User!
+    login(data: LoginUserInput!): AuthPayload!
+
+    createUser(data: CreateUserInput!): AuthPayload!
+    deleteUser: User!
+    updateUser(data: UpdateUserInput!): User!
 
     createPost(data: CreatePostInput!): Post!
     deletePost(id: ID!): Post!
@@ -23,35 +29,41 @@ type Subscription {
     post: PostSubscriptionPayload!,
 }
 
+input LoginUserInput {
+    email: String!
+    password: String!
+}
+
+type AuthPayload {
+    token: String!
+    user: User!
+}
+
 input CreateUserInput {
-    name: String!, 
-    email: String!, 
-    age: Int
+    name: String!
+    email: String!
+    password: String!
 }
 
 input UpdateUserInput {
     name: String
     email: String
-    age: Int
 }
 
 input CreatePostInput {
-    title: String!, 
-    body: String!, 
-    published: Boolean!, 
-    author:ID!,
+    title: String!
+    body: String!
+    published: Boolean!
 }
 
 input UpdatePostInput {
     title: String
     body: String
     published: Boolean
-    author: ID
 }
 
 input CreateCommentInput {
-    text: String!, 
-    author: ID!, 
+    text: String!
     post: ID!
 }
 
@@ -62,10 +74,12 @@ input UpdateCommentInput {
 type User {
     id: ID
     name: String!
-    email: String!
-    age: Int
+    email: String
+    password: String!
     posts: [Post!]!
     comments: [Comment!]!
+    updatedAt: String!
+    createdAt: String!
 }
 
 type Post {
@@ -73,6 +87,8 @@ type Post {
     title: String!
     body: String!
     published: Boolean!
+    updatedAt: String!
+    createdAt: String!
     author: User!
     comments: [Comment!]!
 }
@@ -80,6 +96,8 @@ type Post {
 type Comment {
     id: ID!
     text: String!
+    updatedAt: String!
+    createdAt: String!
     author: User!
     post: Post!
 }
@@ -91,11 +109,11 @@ enum MutationType {
 }
 
 type PostSubscriptionPayload {
-    mutation: MutationType!,
-    data: Post!
+    mutation: MutationType!
+    node: Post!
 }
 
 type CommentSubscriptionPayload {
     mutation: MutationType!
-    data: Comment
+    node: Comment
 }

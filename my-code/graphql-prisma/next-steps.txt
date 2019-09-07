@@ -1,5 +1,39 @@
-  1. Open folder: cd prisma
-  2. Start your Prisma server: docker-compose up -d
-  3. Deploy your Prisma service: prisma deploy
-  4. Read more about Prisma server:
-     http://bit.ly/prisma-server-overview
+1. Open folder: cd prisma
+2. Start your Prisma server: docker-compose up -d
+3. Deploy your Prisma service: prisma deploy
+      or with config files: prisma deploy -e ../config/dev.env
+4. Read more about Prisma server:
+   http://bit.ly/prisma-server-overview
+
+5. Get prisma token:
+   - change directory to the prisma directory
+   - run command: prisma token
+
+6. Deploy to Production Prisma Cloud:
+   - go to directory containing prisma.yml
+   - run command: prisma login
+      - eventually a webpage will load - click "Grant Permission"
+   - run command (again): prisma login
+   - run deploy command: prisma deploy -e ../config/prod.env
+      - will ask which Prisma server to deploy to - make selection
+      - will ask for a name for service
+      - will ask for a stage
+      - then will write to the prisma.yml file the endpoint, and will try to deploy
+         - will show endpoints (http, ws and admin)
+      - will want to copy http endpoint to the prod.env file (PRISMA_ENDPOINT=)
+
+7. Create Heroku application
+   - Install Heroku CLI: https://devcenter.heroku.com/articles/heroku-cli
+   - go to root of project (which contains package.json)
+   - Run command: >heroku create
+      - Note the app name and url
+         - cryptic-beach-36693
+         - https://cryptic-beach-36693.herokuapp.com/ | https://git.heroku.com/cryptic-beach-36693.git
+   - Set environment variables for Heroku app:
+      - run command: >heroku config:set PRISMA_ENDPOINT=https://mkozi-blogging-app-7c852269aa.herokuapp.com/mkozi-blogging-app/prod
+         - can check with command: >heroku config
+   - Push code to Heroku:
+      - can check if heroku successfully added a remote with command: > get remote -v
+      - push code with command: > git push heroku master
+         - this will push the code, run the npm scripts and start the app
+

@@ -4,24 +4,35 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js --ext js,graphql --exec babel-node",
+    "start": "node dist/index.js",
+    "heroku-postbuild": "babel src --out-dir dist --copy-files",
+    "start:dev": "env-cmd -f ./config/dev.env nodemon src/index.js --ext js,graphql --exec babel-node",
+    "start:test": "env-cmd -f ./config/test.env nodemon src/index.js --ext js,graphql --exec babel-node",
     "start:single": "babel-node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "get-schema": "graphql get-schema -p prisma"
+    "test": "jest --watch",
+    "get-schema": "graphql get-schema -p prisma --dotenv config/dev.env",
+    "prisma:deploy": "cd prisma && prisma deploy -e ../config/prod.env && cd .."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
+    "bcrypt": "^3.0.6",
+    "graphql-import": "^0.7.1",
     "graphql-yoga": "^1.18.1",
-    "prisma-binding": "^2.3.15",
-    "uuid": "^3.3.2"
+    "jsonwebtoken": "^8.5.1",
+    "prisma-binding": "^2.3.15"
   },
   "devDependencies": {
+    "env-cmd": "^10.0.1",
+    "@babel/polyfill": "^7.4.4",
+    "babel-core": "^6.26.3",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-jest": "^23.6.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "graphql-cli": "^3.0.12",
+    "jest": "^24.9.0",
     "nodemon": "^1.19.1"
   }
 }

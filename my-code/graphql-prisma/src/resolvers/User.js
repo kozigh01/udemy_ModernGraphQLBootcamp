@@ -1,9 +1,31 @@
+import getUserId from '../utils/getUserId';
+import { Prisma } from 'prisma-binding';
+
 const User = {
-    posts(parent, args, { db }, info) {
-        return db.posts.filter(p => p.author === parent.id);
+    email: {
+        fragment: 'fragment userId on User { id }',
+        resolve(parent, args, { request }, info) {
+            const userId = getUserId(request, false);
+    
+            if(userId && userId === parent.id) {
+                return parent.email;
+            } else {
+                return null;
+            }
+        }
     },
-    comments(parent, age, { db }, info) {
-        return db.comments.filter(c => c.author === parent.id);
+    posts: {
+        fragment: 'fragment userId on User { id }',
+        resolve(parent, args, { prisma, request }, info) {
+            return prisma.query.posts({
+                where: {
+                    AND: [
+                        { published: true },
+                        { author: { id: parent.id } }
+                    ]
+                }
+            }, info);
+        }
     }
 }
 

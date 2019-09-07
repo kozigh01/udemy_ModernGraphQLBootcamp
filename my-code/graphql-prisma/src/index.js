@@ -1,34 +1,29 @@
+import "@babel/polyfill/noConflict";
+
 import { GraphQLServer, PubSub } from 'graphql-yoga';
 
 import db from './db';
-
-import Query from './resolvers/Query';
-import Mutation from './resolvers/Mutation';
-import Subscription from './resolvers/Subscription';
-import Post from './resolvers/Post';
-import User from './resolvers/User';
-import Comment from './resolvers/Comment';
-
-import './prisma';
+import prisma from './prisma';
+import { resolvers, fragmnetReplacements } from './resolvers/index';
 
 const pubsub = new PubSub();
 
 const server = new GraphQLServer({
     typeDefs: './src/schema.graphql',
-    resolvers: {
-        Mutation,
-        Query,
-        Subscription,
-        Post,
-        User,
-        Comment
+    resolvers,
+    context(request) {
+        return {
+            db,
+            pubsub,
+            prisma,
+            request,
+        };
     },
-    context: {
-        db,
-        pubsub,
-    }
+    fragmnetReplacements,
 });
 
-server.start(() => {
-    console.log('The server is up at: http://localhost:4000');
+server.start({
+    port: process.env.PORT
+}, () => {
+    console.log(`The server is up at:: http://localhost:${process.env.PORT}`);
 });
