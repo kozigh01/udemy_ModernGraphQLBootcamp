@@ -25,15 +25,16 @@ const Query = {
             skip: args.skip,
             after: args.after,
             orderBy: args.orderBy,
+            where: {
+                published: true
+            }
         };
 
         if(args.query) {
-            opArgs.where = {
-                OR: [
+            opArgs.where.OR = [
                     { title_contains: args.query },
                     { body_contains: args.query },
-                ]
-            }
+                ];
         }
 
         return prisma.query.posts(opArgs, info);
@@ -42,7 +43,6 @@ const Query = {
     },
     async post(parent, args, { prisma, request}, info) {
         const userId = getUserId(request);
-        console.log(userId);
 
         const posts =  await prisma.query.posts({
             where: {
@@ -73,7 +73,40 @@ const Query = {
         }
 
         return prisma.query.comments(opArgs, info);
-    }
+    },
+    me(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request)
+        
+        return prisma.query.user({
+            where: {
+                id: userId
+            }
+        })
+    },
+    myPosts(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request)
+        const opArgs = {
+            first: args.first,
+            skip: args.skip,
+            after: args.after,
+            orderBy: args.orderBy,
+            where: {
+                author: {
+                    id: userId
+                }
+            }
+        }
+
+        if (args.query) {
+            opArgs.where.OR = [{
+                title_contains: args.query
+            }, {
+                body_contains: args.query
+            }]
+        }
+
+        return prisma.query.posts(opArgs, info)
+    },
 }
 
 export {

@@ -6,6 +6,8 @@ type Query {
     posts(query: String, orderBy: PostOrderByInput, first: Int, skip: Int, after: ID): [Post!]!
     comments(query: String, orderBy: CommentOrderByInput, first: Int, skip: Int, after: ID): [Comment!]!
     post(id: ID!): Post!
+    me: User!
+    myPosts(query: String, first: Int, skip: Int, after: String, orderBy: PostOrderByInput): [Post!]!
 }
 
 type Mutation {
