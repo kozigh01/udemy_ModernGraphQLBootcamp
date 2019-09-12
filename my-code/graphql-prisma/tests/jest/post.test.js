@@ -5,6 +5,7 @@ import prisma from '../../src/prisma.js';
 import getClient from '../utils/getClient';
 import seedTestDatabase, { userOne, postOne, postTwo } from '../utils/seedDatabase';
 import { printSchema } from 'graphql';
+import { getUsers, getPosts, getMyPosts, updatePost} from '../utils/operations';
 
 
 const client = getClient();
@@ -13,16 +14,6 @@ beforeEach(seedTestDatabase);
 
 
 test('Should return published posts', async () => {
-    const getPosts = gql`
-        query {
-            posts {
-                title
-                body
-                published
-            }
-        }
-    `;
-
     const response = await client.query({ query: getPosts });
 
     expect(response.data.posts.length).toBe(1);
@@ -30,16 +21,6 @@ test('Should return published posts', async () => {
 });
 
 test('Should expose public author profiles', async() => {
-    const getUsers = gql`
-        query {
-            users {
-                id
-                name
-                email
-            }
-        }
-    `;
-
     const response = await client.query({ query: getUsers });
 
     expect(response.data.users.length).toBe(1);
@@ -50,16 +31,6 @@ test('Should expose public author profiles', async() => {
 test('Should return my posts for logged in user', async () => {
     const client = getClient(userOne.jwt);
 
-    const getMyPosts = gql`
-        query {
-            myPosts {
-                title
-                body
-                published
-            }
-        }
-    `;
-
     const { data } = await client.query({ query: getMyPosts });
 
     expect(data.myPosts.length).toBe(2);
@@ -68,20 +39,27 @@ test('Should return my posts for logged in user', async () => {
 test('Should be able to update a post', async () => {
     const client = getClient(userOne.jwt);
 
-    const updatePost = gql`
-        mutation {
-            updatePost(
-                id: "${postOne.post.id}",
-                data: {
-                    published: false
-                }
-            ) {
-                published
-            }
-        }
-    `;
+    // const updatePost = gql`
+    //     mutation {
+    //         updatePost(
+    //             id: "${postOne.post.id}",
+    //             data: {
+    //                 published: false
+    //             }
+    //         ) {
+    //             published
+    //         }
+    //     }
+    // `;
 
-    const { data } = await client.mutate({ mutation: updatePost });    
+    const variables = {
+        id: postOne.post.id
+    };
+
+    const { data } = await client.mutate({ 
+        mutation: updatePost,
+        variables
+    });    
     const exists = await prisma.exists.Post({ id: postOne.post.id, published: false });
 
     expect(data.updatePost.published).toBe(false);   
