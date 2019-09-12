@@ -4,8 +4,7 @@ import prisma from '../../src/prisma.js';
 
 import getClient from '../utils/getClient';
 import seedTestDatabase, { userOne, postOne, postTwo } from '../utils/seedDatabase';
-import { printSchema } from 'graphql';
-import { getUsers, getPosts, getMyPosts, updatePost} from '../utils/operations';
+import { getUsers, getPosts, getMyPosts, updatePost, createPost, deletePost } from '../utils/operations';
 
 
 const client = getClient();
@@ -39,19 +38,6 @@ test('Should return my posts for logged in user', async () => {
 test('Should be able to update a post', async () => {
     const client = getClient(userOne.jwt);
 
-    // const updatePost = gql`
-    //     mutation {
-    //         updatePost(
-    //             id: "${postOne.post.id}",
-    //             data: {
-    //                 published: false
-    //             }
-    //         ) {
-    //             published
-    //         }
-    //     }
-    // `;
-
     const variables = {
         id: postOne.post.id
     };
@@ -69,21 +55,18 @@ test('Should be able to update a post', async () => {
 test('Should be able to create a post', async () => {
     const client = getClient(userOne.jwt);
 
-    const createPost = gql`
-        mutation {
-            createPost(
-                data: {
-                    title: "This is post 3",
-                    body: "I am the body for post 03",
-                    published: false,
-                }
-            ) {
-                id
-            }
+    const variables = {
+        data: {
+            title: "This is post 3",
+            body: "I am the body for post 03",
+            published: false,
         }
-    `;
+    };
 
-    const { data } = await client.mutate({ mutation: createPost });
+    const { data } = await client.mutate({ 
+        mutation: createPost,
+        variables
+    });
     const response = await prisma.query.posts();
 
     expect(response.length).toBe(3);
@@ -92,15 +75,10 @@ test('Should be able to create a post', async () => {
 test('Should be able to delete a post', async () => {
     const client = getClient(userOne.jwt);
 
-    const deletePost = gql`
-        mutation {
-            deletePost(id: "${postOne.post.id}") {
-                id
-            }
-        }
-    `;    
-
-    const { data } = await client.mutate({ mutation: deletePost});
+    const { data } = await client.mutate({ 
+        mutation: deletePost,
+        variables: { id: postOne.post.id }
+    });
     const exists = await prisma.exists.Post({ id: postOne.post.id });
 
     expect(data.deletePost.id).toBe(postOne.post.id);

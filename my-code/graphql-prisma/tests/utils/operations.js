@@ -77,6 +77,22 @@ const updatePost = gql`
     }
 `;
 
+const createPost = gql`
+    mutation($data: CreatePostInput!) {
+        createPost(data: $data) {
+            id
+        }
+    }
+`;
+
+const deletePost = gql`
+    mutation($id: ID!) {
+        deletePost(id: $id) {
+            id
+        }
+    }
+`; 
+
 export {
     getUsers,
     createUser,
@@ -84,5 +100,7 @@ export {
     getProfile,
     getPosts,
     getMyPosts,
-    updatePost
+    updatePost,
+    createPost,
+    deletePost
 }
